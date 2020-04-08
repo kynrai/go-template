@@ -1,12 +1,9 @@
 package main
 
 import (
-	"fmt"
-
-	"github.com/kynrai/go-template/pkg/api"
+	"github.com/kynrai/go-template/pkg/server"
 )
 
 func main() {
-	fmt.Println("hello world!")
-	api.New().Run()
+	server.New().Run()
 }

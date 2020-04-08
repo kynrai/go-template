@@ -1,4 +1,4 @@
-package api
+package server
 
 import (
 	"context"
@@ -21,7 +21,6 @@ func New() *Server {
 	}
 
 	s.Router.Route("/v1", func(r chi.Router) {
-		r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("Hello World")) })
 	})
 
 	return s
