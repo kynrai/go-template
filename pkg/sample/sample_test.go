@@ -3,7 +3,7 @@ package sample_test
 import (
 	"testing"
 
-	"github.com/atoscerebro/go-template/pkg/sample"
+	"github.com/kynrai/go-template/pkg/sample"
 )
 
 func TestSample(t *testing.T) {
