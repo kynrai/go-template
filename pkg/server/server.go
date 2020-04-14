@@ -9,16 +9,24 @@ import (
 	"syscall"
 
 	"github.com/go-chi/chi"
+	"github.com/kynrai/go-template/pkg/auth"
 )
 
 type Server struct {
 	Router *chi.Mux
+	Auth   auth.Auth0Repo
 }
 
 func New() *Server {
 	s := &Server{
 		Router: NewRouter(),
+		Auth:   auth.NewAuth0(), // Auth 0 instance
+		// Auth:   auth.NewFirebase(), // Firebase instance
 	}
+
+	s.Router.Route("/auth0-protected", func(r chi.Router) {
+		r.Use(s.Auth.Validate)
+	})
 
 	s.Router.Route("/v1", func(r chi.Router) {
 	})
