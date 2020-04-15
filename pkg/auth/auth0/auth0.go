@@ -11,7 +11,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-var _ Auth0Repo = (*auth0repo)(nil)
+var _ Repo = (*repo)(nil)
 
 const (
 	AUTO0_API_IDENTIFIER = "https://domain/v1"
@@ -37,20 +37,24 @@ type Jwks struct {
 	} `json:"keys"`
 }
 
-type Auth0Repo interface {
+type Repo interface {
 	Validator
 }
 
-type auth0repo struct {
+type Validator interface {
+	Validate(h http.Handler) http.Handler
+}
+
+type repo struct {
 	client     *http.Client
 	middleware *jwtmiddleware.JWTMiddleware
 }
 
-func NewAuth0() Auth0Repo {
+func New() Repo {
 	client := &http.Client{
 		Timeout: time.Second * 5,
 	}
-	r := &auth0repo{
+	r := &repo{
 		client: client,
 	}
 	r.middleware = jwtmiddleware.New(
@@ -61,11 +65,11 @@ func NewAuth0() Auth0Repo {
 	return r
 }
 
-func (r *auth0repo) Validate(h http.Handler) http.Handler {
+func (r *repo) Validate(h http.Handler) http.Handler {
 	return r.middleware.Handler(h)
 }
 
-func (r *auth0repo) validationKeyGetter(token *jwt.Token) (interface{}, error) {
+func (r *repo) validationKeyGetter(token *jwt.Token) (interface{}, error) {
 	// Based off the guide found https://auth0.com/docs/quickstart/backend/golang
 	checkAud := token.Claims.(jwt.MapClaims).VerifyAudience(AUTO0_API_IDENTIFIER, false)
 	if !checkAud {
@@ -82,7 +86,7 @@ func (r *auth0repo) validationKeyGetter(token *jwt.Token) (interface{}, error) {
 	return jwt.ParseRSAPublicKeyFromPEM([]byte(cert))
 }
 
-func (r *auth0repo) getPemCert(token *jwt.Token) (string, error) {
+func (r *repo) getPemCert(token *jwt.Token) (string, error) {
 	resp, err := r.client.Get(AUTH0_JWKS)
 	if err != nil {
 		return "", err

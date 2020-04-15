@@ -9,23 +9,30 @@ import (
 	"syscall"
 
 	"github.com/go-chi/chi"
-	"github.com/kynrai/go-template/pkg/auth"
+	auth "github.com/kynrai/go-template/pkg/auth/auth0"
+	auth0 "github.com/kynrai/go-template/pkg/auth/auth0"
+	firebaseauth "github.com/kynrai/go-template/pkg/auth/firebase"
 )
 
 type Server struct {
-	Router *chi.Mux
-	Auth   auth.Auth0Repo
+	Router       *chi.Mux
+	Auth0        auth.Repo
+	FirebaseAuth firebaseauth.Repo
 }
 
 func New() *Server {
 	s := &Server{
-		Router: NewRouter(),
-		Auth:   auth.NewAuth0(), // Auth 0 instance
-		// Auth:   auth.NewFirebase(), // Firebase instance
+		Router:       NewRouter(),
+		Auth0:        auth0.New(),            // Auth 0 instance
+		FirebaseAuth: firebaseauth.MustNew(), // Firebase instance
 	}
 
 	s.Router.Route("/auth0-protected", func(r chi.Router) {
-		r.Use(s.Auth.Validate)
+		r.Use(s.Auth0.Validate)
+	})
+
+	s.Router.Route("/firebase-protected", func(r chi.Router) {
+		r.Use(firebaseauth.Validate(s.FirebaseAuth))
 	})
 
 	s.Router.Route("/v1", func(r chi.Router) {
